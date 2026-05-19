@@ -4,13 +4,15 @@ export interface Product {
   id: string;
   name: string;
   description: string;
-  price: number;
+  price: number; // Base price or default price
   image: string;
   category: string;
   rating?: number;
+  sizes?: { name: string; price: number; detail?: string }[];
 }
 
 export interface CartItem extends Product {
+  cartItemId: string;
   quantity: number;
   selectedSize?: string;
   selectedMilk?: string;

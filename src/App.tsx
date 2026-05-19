@@ -35,23 +35,28 @@ export default function App() {
     setCurrentScreen('detail');
   };
 
-  const addToCart = (product: Product) => {
+  const addToCart = (product: Product, selectedSize?: string, selectedMilk?: string, priceOverride?: number) => {
     setCartItems(prev => {
-      const existing = prev.find(item => item.id === product.id);
+      const finalSize = selectedSize || (product.sizes?.[0]?.name) || 'Regular';
+      const finalMilk = selectedMilk || 'Whole';
+      const finalPrice = priceOverride ?? (product.sizes?.find(s => s.name === finalSize)?.price) ?? product.price;
+      const cartItemId = `${product.id}-${finalSize}-${finalMilk}`;
+      
+      const existing = prev.find(item => item.cartItemId === cartItemId);
       if (existing) {
-        return prev.map(item => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item);
+        return prev.map(item => item.cartItemId === cartItemId ? { ...item, quantity: item.quantity + 1 } : item);
       }
-      return [...prev, { ...product, quantity: 1 }];
+      return [...prev, { ...product, cartItemId, quantity: 1, selectedSize: finalSize, selectedMilk: finalMilk, price: finalPrice }];
     });
   };
 
-  const removeFromCart = (id: string) => {
-    setCartItems(prev => prev.filter(item => item.id !== id));
+  const removeFromCart = (cartItemId: string) => {
+    setCartItems(prev => prev.filter(item => item.cartItemId !== cartItemId));
   };
 
-  const updateQuantity = (id: string, delta: number) => {
+  const updateQuantity = (cartItemId: string, delta: number) => {
     setCartItems(prev => prev.map(item => {
-      if (item.id === id) {
+      if (item.cartItemId === cartItemId) {
         const newQty = Math.max(1, item.quantity + delta);
         return { ...item, quantity: newQty };
       }
@@ -128,7 +133,7 @@ export default function App() {
               selectedCategory={selectedCategory}
               setSelectedCategory={setSelectedCategory}
               openDetail={openDetail}
-              addToCart={addToCart}
+              addToCart={(p) => addToCart(p)}
             />
           )}
 
@@ -152,7 +157,7 @@ export default function App() {
               key="detail" 
               product={selectedProduct}
               onBack={() => setCurrentScreen('menu')}
-              addToCart={(p) => { addToCart(p); setCurrentScreen('cart'); }}
+              addToCart={(p, s, m, price) => { addToCart(p, s, m, price); setCurrentScreen('cart'); }}
             />
           )}
         </AnimatePresence>
@@ -429,7 +434,7 @@ function MenuScreen({
             </div>
             <div className="flex justify-between items-start mb-2">
               <h3 className="font-headline text-xl font-bold">{p.name}</h3>
-              <span className="font-bold text-secondary text-lg">${p.price.toFixed(2)}</span>
+              <span className="font-bold text-secondary text-lg">৳{p.price.toFixed(2)}</span>
             </div>
             <p className="text-sm text-primary/60 font-medium mb-6 line-clamp-2">{p.description}</p>
             <button 
@@ -474,23 +479,23 @@ function CartScreen({
 
       <div className="space-y-4">
         {cartItems.map(item => (
-          <div key={item.id} className="glass rounded-xl p-4 flex gap-4">
+          <div key={item.cartItemId} className="glass rounded-xl p-4 flex gap-4">
             <div className="w-24 h-24 rounded-lg overflow-hidden shadow-inner flex-shrink-0">
               <img src={item.image} className="w-full h-full object-cover" referrerPolicy="no-referrer" alt={item.name} />
             </div>
             <div className="flex-grow space-y-1">
               <div className="flex justify-between">
                 <h3 className="font-bold text-lg">{item.name}</h3>
-                <button onClick={() => removeItem(item.id)} className="text-primary/40 hover:text-red-500"><X size={20} /></button>
+                <button onClick={() => removeItem(item.cartItemId)} className="text-primary/40 hover:text-red-500"><X size={20} /></button>
               </div>
-              <p className="text-xs text-primary/40 font-bold uppercase tracking-wider">Grande, Oat Milk</p>
+              <p className="text-xs text-primary/40 font-bold uppercase tracking-wider">{item.selectedSize}{item.selectedMilk && item.selectedMilk !== 'None' ? `, ${item.selectedMilk} Milk` : ''}</p>
               <div className="flex justify-between items-end pt-2">
                 <div className="flex items-center gap-4 bg-white/40 rounded-lg px-2 py-1 border border-white">
-                  <button onClick={() => updateQuantity(item.id, -1)} className="p-1"><Minus size={16} /></button>
+                  <button onClick={() => updateQuantity(item.cartItemId, -1)} className="p-1"><Minus size={16} /></button>
                   <span className="font-bold w-4 text-center">{item.quantity}</span>
-                  <button onClick={() => updateQuantity(item.id, 1)} className="p-1"><Plus size={16} /></button>
+                  <button onClick={() => updateQuantity(item.cartItemId, 1)} className="p-1"><Plus size={16} /></button>
                 </div>
-                <span className="font-headline font-bold text-lg text-secondary">${(item.price * item.quantity).toFixed(2)}</span>
+                <span className="font-headline font-bold text-lg text-secondary">৳{(item.price * item.quantity).toFixed(2)}</span>
               </div>
             </div>
           </div>
@@ -507,16 +512,16 @@ function CartScreen({
           <div className="space-y-3 font-medium">
             <div className="flex justify-between">
               <span className="text-primary/60">Subtotal</span>
-              <span>${total.toFixed(2)}</span>
+              <span>৳{total.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-primary/60">Tax (8%)</span>
-              <span>${(total * 0.08).toFixed(2)}</span>
+              <span>৳{(total * 0.08).toFixed(2)}</span>
             </div>
             <div className="h-px bg-primary/10 my-2" />
             <div className="flex justify-between font-headline text-2xl font-bold">
               <span>Total</span>
-              <span className="text-secondary">${(total * 1.08).toFixed(2)}</span>
+              <span className="text-secondary">৳{(total * 1.08).toFixed(2)}</span>
             </div>
           </div>
           <button className="w-full py-4 bg-primary text-white rounded-lg font-bold tracking-widest uppercase shadow-xl hover:shadow-[0_0_20px_var(--color-gold)] transition-all flex items-center justify-center gap-2">
@@ -619,7 +624,11 @@ function ProfileLink({ icon, label }: { icon: ReactNode; label: string }) {
   );
 }
 
-function DetailScreen({ product, onBack, addToCart }: { key?: string; product: Product; onBack: () => void; addToCart: (p: Product) => void }) {
+function DetailScreen({ product, onBack, addToCart }: { key?: string; product: Product; onBack: () => void; addToCart: (p: Product, size?: string, milk?: string, price?: number) => void }) {
+  const [selectedSize, setSelectedSize] = useState<string>(product.sizes?.[0]?.name || 'Regular');
+  const [selectedMilk, setSelectedMilk] = useState<string>('Whole');
+
+  const currentPrice = product.sizes?.find(s => s.name === selectedSize)?.price || product.price;
   return (
     <motion.div 
       initial={{ opacity: 0, y: 100 }}
@@ -658,19 +667,28 @@ function DetailScreen({ product, onBack, addToCart }: { key?: string; product: P
         </div>
 
         <div className="space-y-6">
-          <CustomSection title="Size">
-            <div className="grid grid-cols-3 gap-3">
-              <CustomOption active={true} icon={<Coffee size={16} />} label="Small" detail="12 oz" />
-              <CustomOption icon={<Coffee size={20} />} label="Medium" detail="16 oz" />
-              <CustomOption icon={<Coffee size={24} />} label="Large" detail="20 oz" />
-            </div>
-          </CustomSection>
+          {product.sizes && product.sizes.length > 0 && (
+            <CustomSection title="Size">
+              <div className="grid grid-cols-3 gap-3">
+                {product.sizes.map((size) => (
+                  <CustomOption 
+                    key={size.name}
+                    active={selectedSize === size.name} 
+                    onClick={() => setSelectedSize(size.name)}
+                    icon={<Coffee size={16} />} 
+                    label={size.name} 
+                    detail={size.detail || ''} 
+                  />
+                ))}
+              </div>
+            </CustomSection>
+          )}
 
           <CustomSection title="Milk Base">
             <div className="grid grid-cols-3 gap-3">
-              <CustomPill active={true} label="Whole" />
-              <CustomPill label="Oat (+0.75)" />
-              <CustomPill label="Almond" />
+              <CustomPill active={selectedMilk === 'Whole'} onClick={() => setSelectedMilk('Whole')} label="Whole" />
+              <CustomPill active={selectedMilk === 'Oat'} onClick={() => setSelectedMilk('Oat')} label="Oat (+0.75)" />
+              <CustomPill active={selectedMilk === 'Almond'} onClick={() => setSelectedMilk('Almond')} label="Almond" />
             </div>
           </CustomSection>
         </div>
@@ -681,12 +699,12 @@ function DetailScreen({ product, onBack, addToCart }: { key?: string; product: P
         <motion.button 
           whileHover={{ y: -5 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => addToCart(product)}
+          onClick={() => addToCart(product, selectedSize, selectedMilk, currentPrice)}
           className="w-full py-5 bg-primary text-white rounded-lg font-headline text-lg font-bold shadow-2xl flex items-center justify-center gap-3 relative overflow-hidden group border border-white/10 hover:shadow-[0_0_20px_var(--color-gold)] transition-shadow"
         >
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
           <ShoppingBag size={24} />
-          Add to Order • ${product.price.toFixed(2)}
+          Add to Order • ৳{currentPrice.toFixed(2)}
         </motion.button>
       </div>
     </motion.div>
@@ -702,9 +720,9 @@ function CustomSection({ title, children }: { title: string; children: ReactNode
   );
 }
 
-function CustomOption({ active, icon, label, detail }: { active?: boolean; icon: ReactNode; label: string; detail: string }) {
+function CustomOption({ active, icon, label, detail, onClick }: { active?: boolean; icon: ReactNode; label: string; detail: string; onClick?: () => void }) {
   return (
-    <div className={`p-4 rounded-lg flex flex-col items-center justify-center gap-1 border-2 transition-all cursor-pointer ${
+    <div onClick={onClick} className={`p-4 rounded-lg flex flex-col items-center justify-center gap-1 border-2 transition-all cursor-pointer ${
       active 
         ? 'bg-secondary-container border-secondary text-on-secondary-container shadow-md' 
         : 'bg-white/40 border-white/60 hover:bg-white/60'
@@ -716,9 +734,9 @@ function CustomOption({ active, icon, label, detail }: { active?: boolean; icon:
   );
 }
 
-function CustomPill({ active, label }: { active?: boolean; label: string }) {
+function CustomPill({ active, label, onClick }: { active?: boolean; label: string; onClick?: () => void }) {
   return (
-    <div className={`py-3 rounded-lg flex items-center justify-center text-center font-bold text-sm border transition-all cursor-pointer ${
+    <div onClick={onClick} className={`py-3 rounded-lg flex items-center justify-center text-center font-bold text-sm border transition-all cursor-pointer ${
       active 
         ? 'bg-secondary-container border-secondary text-on-secondary-container shadow-sm' 
         : 'bg-white/40 border-white text-primary/60 hover:bg-white/60'

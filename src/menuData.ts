@@ -21,11 +21,15 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: '3',
-    name: 'Cappuccino Regular - 180 ml',
-    description: '180 ml - Espresso, Steamed Milk, and thick micro foam',
+    name: 'Cappuccino',
+    description: 'Espresso, Steamed Milk, and thick micro foam',
     price: 320,
     image: 'https://images.deliveryhero.io/image/fd-bd/Products/8548737.jpg',
-    category: 'Popular'
+    category: 'Popular',
+    sizes: [
+      { name: 'Regular', detail: '180 ml', price: 320 },
+      { name: 'Large', detail: '360 ml', price: 420 }
+    ]
   },
   {
     id: '4',
@@ -181,11 +185,15 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: '23',
-    name: 'Cappuccino Regular - 180 ml',
-    description: '180 ml - Espresso, Steamed Milk, and thick micro foam',
+    name: 'Cappuccino',
+    description: 'Espresso, Steamed Milk, and thick micro foam',
     price: 320,
     image: 'https://images.deliveryhero.io/image/fd-bd/Products/8548737.jpg',
-    category: 'Hot & Iced Drinks'
+    category: 'Hot & Iced Drinks',
+    sizes: [
+      { name: 'Regular', detail: '180 ml', price: 320 },
+      { name: 'Large', detail: '360 ml', price: 420 }
+    ]
   },
   {
     id: '24',
@@ -219,14 +227,7 @@ export const PRODUCTS: Product[] = [
     image: '/coffee_drink.png',
     category: 'Hot & Iced Drinks'
   },
-  {
-    id: '28',
-    name: 'Large Cappuccino - 360 ml',
-    description: '',
-    price: 420,
-    image: '/coffee_drink.png',
-    category: 'Hot & Iced Drinks'
-  },
+
   {
     id: '29',
     name: 'Flat White',
@@ -725,26 +726,38 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: '91',
-    name: 'Americano Coffee Box (20 Americanos (150 ml x 20)',
+    name: 'Americano Coffee Box',
     description: '',
     price: 2850,
     image: '/coffee_drink.png',
-    category: 'THE Giver Coffee Boxes'
+    category: 'THE Giver Coffee Boxes',
+    sizes: [
+      { name: '12 Box', detail: '12 Americanos', price: 1710 },
+      { name: '20 Box', detail: '20 Americanos', price: 2850 }
+    ]
   },
   {
     id: '92',
-    name: 'Latte Coffee Box (12 Lattes (240 ml x 12)',
+    name: 'Latte Coffee Box',
     description: '',
     price: 3050,
     image: '/coffee_drink.png',
-    category: 'THE Giver Coffee Boxes'
+    category: 'THE Giver Coffee Boxes',
+    sizes: [
+      { name: '12 Box', detail: '12 Lattes', price: 3050 },
+      { name: '20 Box', detail: '20 Lattes', price: 4880 }
+    ]
   },
   {
     id: '93',
-    name: 'Hazelnut Coffee Box (12 Hazelnut Lattes (240 ml x 12)',
+    name: 'Hazelnut Coffee Box',
     description: 'Hazelnut flavored Latte',
     price: 3650,
     image: 'https://images.deliveryhero.io/image/fd-bd/Products/8548733.jpg',
-    category: 'THE Giver Coffee Boxes'
+    category: 'THE Giver Coffee Boxes',
+    sizes: [
+      { name: '12 Box', detail: '12 Hazelnut Lattes', price: 3650 },
+      { name: '20 Box', detail: '20 Hazelnut Lattes', price: 5840 }
+    ]
   }
 ];
