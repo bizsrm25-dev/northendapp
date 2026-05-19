@@ -1,0 +1,6 @@
+{
+  "name": "North End Reserve",
+  "description": "A premium glassmorphic coffee shop experience featuring artisanal brews and refined rituals.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
